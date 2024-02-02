@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func main() {
@@ -28,16 +30,39 @@ func handleConnection(conn net.Conn) {
 
 	buf := make([]byte, 1024)
 	for {
-		_, err := conn.Read(buf)
+		cmd, err := conn.Read(buf)
 		if err != nil {
 			fmt.Println("Error reading from client: ", err.Error())
 			return
 		}
-		message := []byte("+PONG\r\n")
-		_, errr := conn.Write(message)
-		if errr != nil {
-			fmt.Println("Error writing data to connection: ", errr.Error())
-		}
+		handleCommands(string(buf[:cmd]), conn)
 	}
 }
 
+func handleCommands(s string, conn net.Conn) {
+
+	lines := strings.Split(s, "\r\n") 
+	lines = lines[:len(lines)-1] // removing last empyt character.
+
+	if lines[0][0] != '*' {
+		conn.Write([]byte("-invalid command\r\n"))
+	}
+
+	num, err := strconv.Atoi(lines[0][1:])
+	if err != nil || 2*num+1 != len(lines) || num > 2 {
+		conn.Write([]byte("-invalid command\r\n"))
+	}
+
+	switch strings.ToUpper(lines[2]) {
+	case "PING":
+		conn.Write([]byte("+PONG\r\n"))
+	case "ECHO":
+		if len(lines) != 5 {
+			conn.Write([]byte("-invalid command\r\n"))
+		}
+		conn.Write([]byte("+" + lines[4] + "\r\n"))
+	default:
+		conn.Write([]byte("-unknown command\r\n"))
+	}
+
+} 
