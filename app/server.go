@@ -14,7 +14,7 @@ func main() {
 	}
 	defer l.Close()
 	for {
-		conn, err = l.Accept()
+		conn, err := l.Accept()
 		if err != nil {
 			fmt.Println("Error accepting connection: ", err.Error())
 			continue
@@ -26,9 +26,9 @@ func main() {
 
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
-	
+
 	message := []byte("+PONG\r\n")
-	_, err = conn.Write(message)
+	_, err := conn.Write(message)
 	if err != nil {
 		fmt.Println("Error writing data to connection: ", err.Error())
 	}
