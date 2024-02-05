@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var mydb = make(map[string]string)
+
 func main() {
 	l, err := net.Listen("tcp", "0.0.0.0:6379")
 	if err != nil {
@@ -49,7 +51,7 @@ func handleCommands(s string, conn net.Conn) {
 	}
 
 	num, err := strconv.Atoi(lines[0][1:])
-	if err != nil || 2*num+1 != len(lines) || num > 2 {
+	if err != nil || (2*num)+1 != len(lines) {
 		conn.Write([]byte("-invalid command\r\n"))
 	}
 
@@ -61,8 +63,23 @@ func handleCommands(s string, conn net.Conn) {
 			conn.Write([]byte("-invalid command\r\n"))
 		}
 		conn.Write([]byte("+" + lines[4] + "\r\n"))
+	case "SET":
+		if len(lines) != 7 {
+			conn.Write([]byte("-invalid command\r\n"))
+		}
+		mydb[lines[4]] = lines[6]
+		conn.Write([]byte("+OK\r\n"))
+	case "GET":
+		if len(lines) != 5 {
+			conn.Write([]byte("-invalid command\r\n"))
+		}
+		val, ok := mydb[lines[4]]
+		if !ok {
+			conn.Write([]byte("-(nil)\r\n"))
+		}
+		conn.Write([]byte("+" + val + "\r\n"))
+		
 	default:
 		conn.Write([]byte("-unknown command\r\n"))
 	}
-
 } 
