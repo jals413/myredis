@@ -75,7 +75,7 @@ func handleCommands(s string, conn net.Conn) {
 		if len(lines) == 11 {
 			if(lines[8] == "PX") {
 
-				timer := time.After(time.Duration(lines[10]) * time.Millisecond)
+				timer := time.After(time.Duration(strconv.Atoi(lines[10])) * time.Millisecond)
 			
 				go func () {
 					<-timer
