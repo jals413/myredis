@@ -65,34 +65,24 @@ func handleCommands(s string, conn net.Conn) {
 		}
 		conn.Write([]byte("+" + lines[4] + "\r\n"))
 	case "SET":
-		if len(lines) != 7 || len(lines) != 11 {
-			conn.Write([]byte("-invalid command\r\n"))
-		}
-		if len(lines) == 7 {
-			mydb[lines[4]] = lines[6]
-			conn.Write([]byte("+OK\r\n"))
-		}
-		if len(lines) == 11 {
-			if(lines[8] == "PX") {
+		mydb[lines[4]] = lines[6]
+		if len(lines) > 8 {
+			mytime, _ := strconv.Atoi(lines[10])
+			timer := time.After(time.Duration(mytime) * time.Millisecond)
 
-				timer := time.After(time.Duration(lines[10]) * time.Millisecond)
-			
-				go func () {
-					<-timer
-					delete(mydb, lines[4])
-				}
-			}
+			go func () {
+				<-timer
+				delete(mydb, lines[4])
+			}()
 		}
-
+		conn.Write([]byte("+OK\r\n"))
 	case "GET":
-		if len(lines) != 5 {
-			conn.Write([]byte("-invalid command\r\n"))
+		val := mydb[lines[4]]
+		if len(val) > 1  {
+			conn.Write([]byte("+" + val + "\r\n"))
+		} else {
+			conn.Write([]byte("$-1\r\n"))
 		}
-		val, ok := mydb[lines[4]]
-		if !ok {
-			conn.Write([]byte("-(nil)\r\n"))
-		}
-		conn.Write([]byte("+" + val + "\r\n"))
 		
 	default:
 		conn.Write([]byte("-unknown command\r\n"))
