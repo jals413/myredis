@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var mydb = make(map[string]string)
@@ -72,17 +71,18 @@ func handleCommands(s string, conn net.Conn) {
 			mydb[lines[4]] = lines[6]
 			conn.Write([]byte("+OK\r\n"))
 		}
-		if len(lines) == 11 {
-			if(lines[8] == "PX") {
+		// if len(lines) == 11 {
+		// 	if(lines[8] == "PX") {
 
-				timer := time.After(time.Duration(lines[10]) * time.Millisecond)
+		// 		fmt.Println(lines[10])
+		// 		// timer := time.After(time.Duration(strconv.Atoi(lines[10])) * time.Millisecond)
 			
-				go func () {
-					<-timer
-					delete(mydb, lines[4])
-				}
-			}
-		}
+		// 		// go func () {
+		// 		// 	<-timer
+		// 		// 	delete(mydb, lines[4])
+		// 		// }
+		// 	}
+		// }
 
 	case "GET":
 		if len(lines) != 5 {
