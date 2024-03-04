@@ -44,7 +44,7 @@ func handleConnection(conn net.Conn) {
 
 func handleCommands(s string, conn net.Conn) {
 
-	lines := strings.Split(s, "\r\n") 
+	lines := strings.Split(s, "\r\n")
 	lines = lines[:len(lines)-1] // removing last empyt character.
 
 	if lines[0][0] != '*' {
@@ -70,7 +70,7 @@ func handleCommands(s string, conn net.Conn) {
 			mytime, _ := strconv.Atoi(lines[10])
 			timer := time.After(time.Duration(mytime) * time.Millisecond)
 
-			go func () {
+			go func() {
 				<-timer
 				delete(mydb, lines[4])
 			}()
@@ -78,13 +78,13 @@ func handleCommands(s string, conn net.Conn) {
 		conn.Write([]byte("+OK\r\n"))
 	case "GET":
 		val := mydb[lines[4]]
-		if len(val) > 1  {
+		if len(val) > 1 {
 			conn.Write([]byte("+" + val + "\r\n"))
 		} else {
 			conn.Write([]byte("$-1\r\n"))
 		}
-		
+
 	default:
 		conn.Write([]byte("-unknown command\r\n"))
 	}
-} 
+}
